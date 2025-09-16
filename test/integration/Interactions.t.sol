@@ -116,4 +116,3 @@ contract RaffleTest is StdCheats, Test {
         assert(endingTimeStamp > startingTimeStamp);
     }
 }
-

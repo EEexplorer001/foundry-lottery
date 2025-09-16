@@ -7,7 +7,6 @@ import {HelperConfig} from "script/HelperConfig.s.sol";
 import {CreateSubscription, FundSubscription, AddConsumer} from "script/Interactions.s.sol";
 
 contract DeployRaffle is Script {
-
     function deployContract() public returns (Raffle, HelperConfig) {
         HelperConfig helperConfig = new HelperConfig();
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
@@ -17,12 +16,10 @@ contract DeployRaffle is Script {
             CreateSubscription createSubscription = new CreateSubscription();
             (config.subscriptionId, config.vrfCoordinator) =
                 createSubscription.createSubscription(config.vrfCoordinator, config.account);
-            
+
             // Fund it
             FundSubscription fundSubscription = new FundSubscription();
-            fundSubscription.fundSubscription(
-                config.vrfCoordinator, config.subscriptionId, config.link, config.account
-            );
+            fundSubscription.fundSubscription(config.vrfCoordinator, config.subscriptionId, config.link, config.account);
         }
 
         vm.startBroadcast(config.account);
@@ -39,9 +36,7 @@ contract DeployRaffle is Script {
         AddConsumer addConsumer = new AddConsumer();
         // don't need to broadcast, because in addConsumer we already did
         // we have to first deploy the raffle contract, then we can add it as a consumer
-        addConsumer.addConsumer(
-            address(raffle), config.vrfCoordinator, config.subscriptionId, config.account
-        );
+        addConsumer.addConsumer(address(raffle), config.vrfCoordinator, config.subscriptionId, config.account);
 
         return (raffle, helperConfig);
     }
@@ -49,5 +44,4 @@ contract DeployRaffle is Script {
     function run() public {
         deployContract();
     }
-
 }

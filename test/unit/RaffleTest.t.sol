@@ -9,7 +9,7 @@ import {Vm} from "forge-std/Vm.sol";
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 import {CodeConstants} from "script/HelperConfig.s.sol";
 
-contract RaffleTest is Test, CodeConstants{
+contract RaffleTest is Test, CodeConstants {
     Raffle public raffle;
     HelperConfig public helperConfig;
 
@@ -92,7 +92,7 @@ contract RaffleTest is Test, CodeConstants{
         vm.warp(block.timestamp + interval + 1); // set blocktime
         vm.roll(block.number + 1); // change block number
         // Act
-        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
         // Assert
         assert(upkeepNeeded == false);
     }
@@ -105,7 +105,7 @@ contract RaffleTest is Test, CodeConstants{
         vm.roll(block.number + 1); // change block number
         raffle.performUpkeep(""); // Now the raffle is in calculating state
         // Act
-        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
         // Assert
         assert(upkeepNeeded == false);
     }
@@ -117,7 +117,7 @@ contract RaffleTest is Test, CodeConstants{
         vm.warp(block.timestamp + (interval - 1)); // set blocktime
         vm.roll(block.number + 1); // change block number
         // Act
-        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
         // Assert
         assert(upkeepNeeded == false);
     }
@@ -129,7 +129,7 @@ contract RaffleTest is Test, CodeConstants{
         vm.warp(block.timestamp + interval + 1); // set blocktime
         vm.roll(block.number + 1); // change block number
         // Act
-        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
         // Assert
         assert(upkeepNeeded == true);
     }
@@ -157,12 +157,7 @@ contract RaffleTest is Test, CodeConstants{
 
         // Act / Assert
         vm.expectRevert(
-            abi.encodeWithSelector(
-                Raffle.Raffle__UpkeepNotNeeded.selector,
-                currentBalance,
-                numPlayers,
-                uint256(rState)
-            )
+            abi.encodeWithSelector(Raffle.Raffle__UpkeepNotNeeded.selector, currentBalance, numPlayers, uint256(rState))
         );
         raffle.performUpkeep("");
     }
@@ -175,13 +170,12 @@ contract RaffleTest is Test, CodeConstants{
         _;
     }
 
-    function testPerformUpkeepUpdatesRaffleStateAndEmitsRequestId() public raffleEntered{
+    function testPerformUpkeepUpdatesRaffleStateAndEmitsRequestId() public raffleEntered {
         // Act / Assert
         vm.recordLogs();
         raffle.performUpkeep("");
         Vm.Log[] memory entries = vm.getRecordedLogs();
         bytes32 requestId = bytes32(entries[1].topics[1]);
-
 
         Raffle.RaffleState rState = raffle.getRaffleState();
         assert(uint256(requestId) > 0);
@@ -196,13 +190,17 @@ contract RaffleTest is Test, CodeConstants{
     }
 
     // Fuzz test
-    function testFulfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(uint256 randomRequestId) public raffleEntered skipFork{
+    function testFulfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(uint256 randomRequestId)
+        public
+        raffleEntered
+        skipFork
+    {
         // Arrange
         vm.expectRevert(VRFCoordinatorV2_5Mock.InvalidRequest.selector);
         VRFCoordinatorV2_5Mock(vrfCoordinator).fulfillRandomWords(randomRequestId, address(raffle));
     }
 
-    function testFulfillRandomWordsPicksAWinnerResetsAndSendsMoney() public raffleEntered skipFork{
+    function testFulfillRandomWordsPicksAWinnerResetsAndSendsMoney() public raffleEntered skipFork {
         // Arrange
         uint256 additionalEntrants = 3; // 4 total
         uint256 startingIndex = 1;
@@ -238,5 +236,4 @@ contract RaffleTest is Test, CodeConstants{
         assert(winnerBalance == winnerStartingBalance + prize);
         assert(endingTimeStamp > startingTimeStamp);
     }
-
 }
