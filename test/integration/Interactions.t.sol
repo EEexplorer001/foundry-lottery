@@ -30,7 +30,7 @@ contract InteractionTest is Test {
 
     uint256 public constant FUND_AMOUNT = 3 ether;
 
-    function setUp() external{
+    function setUp() external {
         DeployRaffle deployer = new DeployRaffle();
         (raffle, helperConfig) = deployer.deployContract();
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
@@ -63,12 +63,12 @@ contract InteractionTest is Test {
         // Act
         // Create a subscription
         (uint256 subId,) = createSubscription.createSubscription(vrfCoordinator, account);
-        (uint96 balanceBeforeFund, , , ,) = vrfCoordinatorMock.getSubscription(subId);
+        (uint96 balanceBeforeFund,,,,) = vrfCoordinatorMock.getSubscription(subId);
         console.log("Balance before fund: ", balanceBeforeFund);
 
         // Fund the subscription
         fundSubscription.fundSubscription(vrfCoordinator, subId, link, account);
-        (uint96 balanceAfterFund, , , ,) = vrfCoordinatorMock.getSubscription(subId);
+        (uint96 balanceAfterFund,,,,) = vrfCoordinatorMock.getSubscription(subId);
         console.log("Balance after fund: ", balanceAfterFund);
         // Assert
         assertEq(FUND_AMOUNT * 100, balanceAfterFund - balanceBeforeFund);
@@ -84,7 +84,7 @@ contract InteractionTest is Test {
         // Don't have tp deploy Raffle again, we already did that in the setUp function
         addConsumer.addConsumer(address(raffle), vrfCoordinator, subId, account);
         // Assert
-        (, , , , address[] memory consumers) = vrfCoordinatorMock.getSubscription(subId);
+        (,,,, address[] memory consumers) = vrfCoordinatorMock.getSubscription(subId);
         assertEq(consumers[0], address(raffle));
     }
 }
